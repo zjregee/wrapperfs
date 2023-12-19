@@ -93,15 +93,15 @@ static struct fuse_operations operations = {
 };
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) {
+    if (argc != 5) {
         std::cout << "wrapperfs mount error." << std::endl;
         return 1;
     }
-    auto file_logger = spdlog::basic_logger_mt("file_logger", argv[3]);
+    auto file_logger = spdlog::basic_logger_mt("file_logger", argv[4]);
     spdlog::set_default_logger(file_logger);
     spdlog::set_level(wrapperfs::DEFAULT_LOG_LEVEL);
     spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] %v");
-    fs = new wrapperfs::wrapperfs(argv[2]);
+    fs = new wrapperfs::wrapperfs(argv[2], argv[3]);
     int fuse_argc = 4;
     char* fuse_argv[] = { argv[0], argv[1], "-s", "-f" };
     std::cout << "start to run wrapperfs at " << argv[0] << " " << argv[1] << "." << std::endl;

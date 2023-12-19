@@ -6,12 +6,13 @@
 #include "wrapper/inode.h"
 #include "wrapper/wrapper.h"
 #include "utils/hash_routine.h"
+#include "adaptor/leveldb_adaptor.h"
 
 namespace wrapperfs {
 
 class wrapperfs {
 public:
-    wrapperfs(const std::string &data_dir);
+    wrapperfs(const std::string &data_dir, const std::string &db_dir);
     int getattr(const char* path, struct stat* statbuf);
     int mknod(const char* path, mode_t mode, dev_t dev);
     int mkdir(const char* path, mode_t mode);
@@ -25,6 +26,7 @@ public:
 
 private:
     std::string data_dir_;
+    LevelDBAdaptor* adaptor_;
 };
 
 }
