@@ -2,8 +2,8 @@
 
 #include <vector>
 #include <string>
+#include <utility>
 
-#include "utils/logger_routine.h"
 #include "adaptor/leveldb_adaptor.h"
 
 namespace wrapperfs {
@@ -24,8 +24,7 @@ struct location_metadata_t {
 };
 
 struct index_metadata_t {
-    int distance;
-    std::vector<size_t> list;
+    std::vector<std::pair<int, std::vector<size_t>>> list;
 };
 
 struct wrapper_t {
@@ -34,6 +33,7 @@ struct wrapper_t {
     index_metadata_t index_metadata;
 };
 
+std::string decode_wrapper(wrapper_t* wrapper);
 bool get_wrapper(LevelDBAdaptor* adaptor, size_t wrapper_id, wrapper_t* &wrapper);
 bool put_wrapper(LevelDBAdaptor* adaptor, size_t wrapper_id, wrapper_t* wrapper);
 int distance_compute(wrapper_t* a, wrapper_t* b);

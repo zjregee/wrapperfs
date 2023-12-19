@@ -4,9 +4,9 @@
 #include <sstream>
 #include <sys/stat.h>
 #include <unordered_map>
+#include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
-#include "utils/logger_routine.h"
 #include "adaptor/leveldb_adaptor.h"
 
 namespace wrapperfs {

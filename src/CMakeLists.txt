@@ -1,3 +1,4 @@
+add_subdirectory(fs)
 add_subdirectory(utils)
 add_subdirectory(common)
 add_subdirectory(adaptor)
@@ -6,6 +7,7 @@ add_subdirectory(wrapper)
 add_library(wrapperfs STATIC ${ALL_OBJECT_FILES})
 
 set(WRAPPERFS_LIBS
+    wrapperfs_fs
     wrapperfs_utils
     wrapperfs_common
     wrapperfs_adaptor
