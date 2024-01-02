@@ -2,10 +2,12 @@
 
 #define FUSE_USE_VERSION 26
 #include <fuse.h>
-
+#include <sstream>
 #include "wrapper/inode.h"
 #include "wrapper/wrapper.h"
 #include "utils/hash_routine.h"
+#include "utils/string_routine.h"
+#include "utils/filesystem_routine.h"
 #include "adaptor/leveldb_adaptor.h"
 
 namespace wrapperfs {
@@ -27,6 +29,8 @@ public:
 private:
     std::string data_dir_;
     LevelDBAdaptor* adaptor_;
+
+    void get_file_path(size_t ino, std::string &path);
 };
 
 }

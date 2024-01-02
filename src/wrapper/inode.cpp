@@ -17,6 +17,9 @@ std::string decode_inode_data(size_t inode_id) {
 }
 
 bool get_inode(LevelDBAdaptor* adaptor, size_t inode_id, inode_t* &inode) {
+    if (ENABELD_LOG) {
+        spdlog::info("get_inode: inode_id - {}", inode_id);
+    }
     std::string metadata_key = decode_inode_metadata(inode_id);
     std::string data_key = decode_inode_data(inode_id);
     std::string metadata_value;
@@ -46,6 +49,9 @@ bool get_inode(LevelDBAdaptor* adaptor, size_t inode_id, inode_t* &inode) {
 }
 
 bool put_inode(LevelDBAdaptor* adaptor, size_t inode_id, inode_t* inode) {
+    if (ENABELD_LOG) {
+        spdlog::info("put_inode: inode_id - {}", inode_id);
+    }
     if (inode == nullptr) {
         spdlog::error("put inode error");
         return false;

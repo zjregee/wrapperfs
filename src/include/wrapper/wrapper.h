@@ -10,32 +10,35 @@ namespace wrapperfs {
 
 enum wrapper_tag {
     directory_relation,
-    similarity_relation,
 };
 
-struct group_metadata_t {
-    size_t id;
-    size_t tag;
+// 点查询
+struct entries_t {
+    wrapper_tag tag;
+    size_t wrapper_id;
+    std::vector<std::pair<size_t, std::string>> list;
 };
 
-struct location_metadata_t {
-    std::string location;
-    std::vector<size_t> list;
+// 范围查询
+struct relation_t {
+    wrapper_tag tag;
+    size_t wrapper_id;
+    std::string distance;
+    size_t next_wrapper_id;
 };
 
-struct index_metadata_t {
-    std::vector<std::pair<int, std::vector<size_t>>> list;
+// 目录树适配
+struct location_t {
+    wrapper_tag tag;
+    size_t wrapper_id;
+    size_t ino;
 };
 
-struct wrapper_t {
-    group_metadata_t group_metadata;
-    location_metadata_t location_metadata;
-    index_metadata_t index_metadata;
-};
-
-std::string decode_wrapper(wrapper_t* wrapper);
-bool get_wrapper(LevelDBAdaptor* adaptor, size_t wrapper_id, wrapper_t* &wrapper);
-bool put_wrapper(LevelDBAdaptor* adaptor, size_t wrapper_id, wrapper_t* wrapper);
-int distance_compute(wrapper_t* a, wrapper_t* b);
+bool get_entries(LevelDBAdaptor* adaptor, entries_t* &entries);
+bool put_entries(LevelDBAdaptor* adaptor, entries_t* entries);
+bool get_relation(LevelDBAdaptor* adaptor, relation_t* &relation);
+bool put_relation(LevelDBAdaptor* adaptor, relation_t* relation);
+bool get_location(LevelDBAdaptor* adaptor, location_t* &location);
+bool put_location(LevelDBAdaptor* adaptor, location_t* location);
 
 }
