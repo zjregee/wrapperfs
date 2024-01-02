@@ -2,16 +2,28 @@
 
 namespace wrapperfs {
 
-bool get_wrapper(LevelDBAdaptor* adaptor, size_t wrapper_id, wrapper_t* &inode) {
+bool get_entries(LevelDBAdaptor* adaptor, entries_t* &entries) {
     return true;
 }
 
-bool put_wrapper(LevelDBAdaptor* adaptor, size_t wrapper_id, wrapper_t* inode) {
+bool put_entries(LevelDBAdaptor* adaptor, entries_t* entries) {
     return true;
 }
 
-int distance_compute(wrapper_t* a, wrapper_t* b) {
-    return 0;
+bool get_relation(LevelDBAdaptor* adaptor, relation_t* &relation) {
+    return true;
+}
+
+bool put_relation(LevelDBAdaptor* adaptor, relation_t* relation) {
+    return true;
+}
+
+bool get_location(LevelDBAdaptor* adaptor, location_t* &location) {
+    return true;
+}
+
+bool put_location(LevelDBAdaptor* adaptor, location_t* location) {
+    return true;
 }
 
 }
