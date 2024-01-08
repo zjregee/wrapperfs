@@ -104,11 +104,14 @@ bool get_inode(LevelDBAdaptor* adaptor, size_t inode_id, inode_t* &inode) {
     }
     if (!get_inode_data(adaptor, inode_id, data)) {
         inode = nullptr;
+        delete metadata;
         return false;
     }
     inode = new inode_t;
     std::memcpy(&inode->metadata, metadata, sizeof(inode_metadata_t));
-
+    inode->data.map = data->map;
+    delete metadata;
+    delete data;
     return true;
 }
 
@@ -117,14 +120,8 @@ bool put_inode(LevelDBAdaptor* adaptor, size_t inode_id, inode_t* inode) {
         spdlog::error("put inode inode_id - {}: inode doesn't exist");
         return false;
     }
-    if (!put_inode_metadata(adaptor, inode_id, inode->metadata)) {
-        delete inode;
-        return false;
-    }
-    if (!put_inode_data(adaptor, inode_id, inode->data)) {
-        delete inode;
-        return false;
-    }
+    inode_metadata_t* &metadata_ref = inode->metadata;
+    inode_data_t* &data_ref = inode->data;
     delete inode;
     return true;
 }
