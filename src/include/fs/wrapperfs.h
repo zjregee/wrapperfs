@@ -27,6 +27,7 @@ public:
     int releasedir(const char* path, struct fuse_file_info* file_info);
 
 private:
+    size_t max_ino;
     std::string data_dir_;
     LevelDBAdaptor* adaptor_;
 

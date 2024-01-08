@@ -35,13 +35,13 @@ struct inode_data_t {
 };
 
 struct inode_t {
-    inode_metadata_t metadata;
-    inode_data_t data;
+    inode_metadata_t* metadata;
+    inode_data_t* data;
 
     std::string debug() {
         std::stringstream s;
-        s << "inode - " << metadata.stat.st_ino;
-        for (auto &kv : data.map) {
+        s << "inode_id - " << metadata->stat.st_ino;
+        for (auto &kv : data->map) {
             s << " " << kv.first << " - " << kv.second;
         }
         return s.str();

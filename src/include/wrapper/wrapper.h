@@ -2,8 +2,12 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 #include <utility>
+#include <spdlog/spdlog.h>
+#include <nlohmann/json.hpp>
 
+#include "common/config.h"
 #include "adaptor/leveldb_adaptor.h"
 
 namespace wrapperfs {
@@ -17,6 +21,17 @@ struct entries_t {
     wrapper_tag tag;
     size_t wrapper_id;
     std::vector<std::pair<size_t, std::string>> list;
+
+    std::string debug() {
+        std::stringstream s;
+        s << "tag - " << tag;
+        s << " wrapper_id" << wrapper_id;
+        for (auto &entry: list) {
+            s << " inode_id - " << entry.first;
+            s << " attribute - " << entry.second;
+        }
+        return s.str();
+    }
 };
 
 // 范围查询
@@ -25,6 +40,15 @@ struct relation_t {
     size_t wrapper_id;
     std::string distance;
     size_t next_wrapper_id;
+
+    std::string debug() {
+        std::stringstream s;
+        s << "tag - " << tag;
+        s << " wrapper_id" << wrapper_id;
+        s << " distance - " << distance;
+        s << " next_wrapper_id - " << next_wrapper_id;
+        return s.str();
+    }
 };
 
 // 目录树适配
@@ -32,6 +56,14 @@ struct location_t {
     wrapper_tag tag;
     size_t wrapper_id;
     size_t ino;
+
+    std::string debug() {
+        std::stringstream s;
+        s << "tag - " << tag;
+        s << " wrapper_id" << wrapper_id;
+        s << " ino - " << ino;
+        return s.str();
+    }
 };
 
 bool get_entries(LevelDBAdaptor* adaptor, entries_t* &entries);

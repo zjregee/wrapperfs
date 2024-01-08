@@ -7,7 +7,7 @@ LevelDBAdaptor::LevelDBAdaptor(const std::string &database_name) {
     options.create_if_missing = true;
     leveldb::Status status = leveldb::DB::Open(options, database_name, &db_);
     if (!status.ok()) {
-        perror("open database error");
+        spdlog::error("leveldbadaptor database_name - {} :leveldb can't open failed", database_name);
         exit(1);
     }
 }
