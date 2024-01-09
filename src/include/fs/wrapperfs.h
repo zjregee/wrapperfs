@@ -3,6 +3,8 @@
 #define FUSE_USE_VERSION 26
 #include <fuse.h>
 #include <sstream>
+#include <spdlog/spdlog.h>
+
 #include "wrapper/inode.h"
 #include "wrapper/wrapper.h"
 #include "utils/hash_routine.h"

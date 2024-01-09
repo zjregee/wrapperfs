@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <utility>
+#include <sys/stat.h>
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
@@ -51,17 +52,16 @@ struct relation_t {
     }
 };
 
-// 目录树适配
+// 点查询
 struct location_t {
     wrapper_tag tag;
     size_t wrapper_id;
-    size_t ino;
+    struct stat stat;
 
     std::string debug() {
         std::stringstream s;
         s << "tag - " << tag;
         s << " wrapper_id" << wrapper_id;
-        s << " ino - " << ino;
         return s.str();
     }
 };

@@ -44,8 +44,8 @@ bool get_entries(LevelDBAdaptor* adaptor, entries_t* &entries) {
     std::string value;
     if (!adaptor->GetValue(key, value)) {
         entries = nullptr;
-        spdlog::error("get entries tag - {} wrapper_id - {}: entries doesn't exist", entries->tag, entries->wrapper_id);
-        exit(1);
+        spdlog::warn("get entries tag - {} wrapper_id - {}: entries doesn't exist", entries->tag, entries->wrapper_id);
+        return false;
     }
     entries = new entries_t;
     try {
@@ -91,8 +91,8 @@ bool get_relation(LevelDBAdaptor* adaptor, relation_t* &relation) {
     std::string value;
     if (!adaptor->GetValue(key, value)) {
         relation = nullptr;
-        spdlog::error("get relation tag - {} wrapper_id - {} distance - {}: relation doesn't exist", relation->tag, relation->wrapper_id, relation->distance);
-        exit(1);
+        spdlog::warn("get relation tag - {} wrapper_id - {} distance - {}: relation doesn't exist", relation->tag, relation->wrapper_id, relation->distance);
+        return false;
     }
     relation = new relation_t;
     try {
@@ -140,15 +140,18 @@ bool get_location(LevelDBAdaptor* adaptor, location_t* &location) {
     std::string value;
     if (!adaptor->GetValue(key, value)) {
         location = nullptr;
-        spdlog::error("get location tag - {} wrapper_id - {}: location doesn't exist", location->tag, location->wrapper_id);
-        exit(1);
+        spdlog::warn("get location tag - {} wrapper_id - {}: location doesn't exist", location->tag, location->wrapper_id);
+        return false;
     }
     location = new location_t;
     try {
+        std::string stat_value;
         nlohmann::json json = nlohmann::json::parse(value);
         json.at("tag").get_to(location->tag);
         json.at("wrapper_id").get_to(location->wrapper_id);
-        json.at("ino").get_to(location->ino);
+        json.at("stat_value").get_to(stat_value);
+        const struct stat* stat = reinterpret_cast<const struct stat *>(stat_value.data());
+        std::memcpy(&location->stat, stat, sizeof(struct stat));
     } catch (const std::exception& e) {
         location = nullptr;
         spdlog::error("get location tag - {} wrapper_id - {}: unresolved data format", location->tag, location->wrapper_id);
@@ -169,9 +172,10 @@ bool put_location(LevelDBAdaptor* adaptor, location_t* location) {
         spdlog::info("put location: {}", location->debug());
     }
     std::string key = decode_location(location);
+    std::string stat_value = std::string(reinterpret_cast<const char*>(&location->stat), sizeof(struct stat));
     nlohmann::json json = nlohmann::json{{"tag", location->tag},
                                           {"wrapper_id", location->wrapper_id},
-                                          {"ino", location->ino}};
+                                          {"stat_value", stat_value}};
     std::string value = json.dump();
     if (!adaptor->Insert(key, value)) {
         delete location;
