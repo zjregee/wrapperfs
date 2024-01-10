@@ -72,5 +72,6 @@ bool get_relation(LevelDBAdaptor* adaptor, relation_t* &relation);
 bool put_relation(LevelDBAdaptor* adaptor, relation_t* relation);
 bool get_location(LevelDBAdaptor* adaptor, location_t* &location);
 bool put_location(LevelDBAdaptor* adaptor, location_t* location);
+bool get_range_relations(LevelDBAdaptor* adaptor, std::vector<relation_t> &relations);
 
 }

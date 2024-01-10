@@ -4,6 +4,7 @@
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
+
 #include "fs/wrapperfs.h"
 #include "common/config.h"
 
@@ -95,7 +96,7 @@ static struct fuse_operations operations = {
 int main(int argc, char *argv[]) {
     if (argc != 5) {
         std::cout << "wrapperfs mount error." << std::endl;
-        return 1;
+        exit(1);
     }
     auto file_logger = spdlog::basic_logger_mt("file_logger", argv[4]);
     spdlog::set_default_logger(file_logger);

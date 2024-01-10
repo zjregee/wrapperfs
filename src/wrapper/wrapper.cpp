@@ -186,4 +186,9 @@ bool put_location(LevelDBAdaptor* adaptor, location_t* location) {
     return true;
 }
 
+bool get_range_relations(LevelDBAdaptor* adaptor, std::vector<relation_t> &relations) {
+    relations.clear();
+    return true;
+}
+
 }

@@ -1,0 +1,1 @@
+./build/tools/mkfs [db_dir]
