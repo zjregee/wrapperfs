@@ -27,16 +27,32 @@ std::string decode_relation(relation_t* relation) {
     return oss.str();
 }
 
-std::string decode_location(location_t* location) {
+std::string decode_location(wrapper_tag tag, size_t wrapper_id) {
     std::ostringstream oss;
     oss << "location:";
-    switch (location->tag) {
+    switch (tag) {
         case directory_relation:
             oss << "d:";
             break;
     }
-    oss << std::setw(6) << std::setfill('0') << location->wrapper_id << ":";
+    oss << std::setw(6) << std::setfill('0') << wrapper_id << ":";
     return oss.str();
+}
+
+std::pair<std::string, std::string> decode_range_relotions(wrapper_tag tag, size_t wrapper_id) {
+    std::ostringstream start_key_oss;
+    std::ostringstream end_key_oss;
+    start_key_oss << "relations:";
+    end_key_oss << "relations:";
+    switch (tag) {
+        case directory_relation:
+            start_key_oss << "d:";
+            end_key_oss << "d:";
+            break;
+    }
+    start_key_oss << std::setw(6) << std::setfill('0') << wrapper_id << ":";
+    end_key_oss << std::setw(6) << std::setfill('0') << wrapper_id + 1 << ":";
+    return std::make_pair(start_key_oss.str(), end_key_oss.str());
 }
 
 bool get_entries(LevelDBAdaptor* adaptor, entries_t* &entries) {
@@ -135,35 +151,24 @@ bool put_relation(LevelDBAdaptor* adaptor, relation_t* relation) {
     return true;
 }
 
-bool get_location(LevelDBAdaptor* adaptor, location_t* &location) {
-    std::string key = decode_location(location);
+bool get_location(LevelDBAdaptor* adaptor, wrapper_tag tag, size_t wrapper_id, location_t* &location) {
+    std::string key = decode_location(tag, wrapper_id);
     std::string value;
     if (!adaptor->GetValue(key, value)) {
         location = nullptr;
-        spdlog::warn("get location tag - {} wrapper_id - {}: location doesn't exist", location->tag, location->wrapper_id);
+        spdlog::warn("get location tag - {} wrapper_id - {}: location doesn't exist", tag, wrapper_id);
         return false;
     }
     location = new location_t;
-    try {
-        std::string stat_value;
-        nlohmann::json json = nlohmann::json::parse(value);
-        json.at("tag").get_to(location->tag);
-        json.at("wrapper_id").get_to(location->wrapper_id);
-        json.at("stat_value").get_to(stat_value);
-        const struct stat* stat = reinterpret_cast<const struct stat *>(stat_value.data());
-        std::memcpy(&location->stat, stat, sizeof(struct stat));
-    } catch (const std::exception& e) {
-        location = nullptr;
-        spdlog::error("get location tag - {} wrapper_id - {}: unresolved data format", location->tag, location->wrapper_id);
-        exit(1);
-    }
+    const location_t* data = reinterpret_cast<const location_t *>(value.data());
+    std::memcpy(&location, data, sizeof(location_t));
     if (ENABELD_LOG) {
         spdlog::info("get location: {}", location->debug());
     }
     return true;
 }
 
-bool put_location(LevelDBAdaptor* adaptor, location_t* location) {
+bool put_location(LevelDBAdaptor* adaptor, wrapper_tag tag, size_t wrapper_id, location_t* location) {
     if (location == nullptr) {
         spdlog::error("put location: location doesn't exist");
         exit(1);
@@ -171,23 +176,42 @@ bool put_location(LevelDBAdaptor* adaptor, location_t* location) {
     if (ENABELD_LOG) {
         spdlog::info("put location: {}", location->debug());
     }
-    std::string key = decode_location(location);
-    std::string stat_value = std::string(reinterpret_cast<const char*>(&location->stat), sizeof(struct stat));
-    nlohmann::json json = nlohmann::json{{"tag", location->tag},
-                                          {"wrapper_id", location->wrapper_id},
-                                          {"stat_value", stat_value}};
-    std::string value = json.dump();
+    std::string key = decode_location(tag, wrapper_id);
+    std::string value = std::string(reinterpret_cast<const char*>(&location), sizeof(location_t));
     if (!adaptor->Insert(key, value)) {
         delete location;
-        spdlog::error("put location tag - {} wrapper_id - {}: kv store interanl error", location->tag, location->wrapper_id);
+        spdlog::error("put location tag - {} wrapper_id - {}: kv store interanl error", tag, wrapper_id);
         exit(1);
     }
     delete location;
     return true;
 }
 
-bool get_range_relations(LevelDBAdaptor* adaptor, std::vector<relation_t> &relations) {
+bool get_range_relations(LevelDBAdaptor* adaptor, wrapper_tag tag, size_t wrapper_id, std::vector<relation_t> &relations) {
     relations.clear();
+    std::pair<std::string, std::string> keys = decode_range_relotions(tag, wrapper_id);
+    std::vector<std::pair<std::string, std::string>> key_value_pair_list;
+    if (!adaptor->GetRange(keys.first, keys.second, key_value_pair_list)) {
+        spdlog::error("get range relations tag - {} wrapper_id - {}: kv store interanl error", tag, wrapper_id);
+        exit(1);
+    }
+    for (auto &key_value_pair : key_value_pair_list) {
+        relation_t relation;
+        try {
+            nlohmann::json json = nlohmann::json::parse(key_value_pair.second);
+            json.at("tag").get_to(relation.tag);
+            json.at("wrapper_id").get_to(relation.wrapper_id);
+            json.at("distance").get_to(relation.distance);
+            json.at("next_wrapper_id").get_to(relation.next_wrapper_id);
+        } catch (const std::exception& e) {
+            spdlog::error("get range relations tag - {} wrapper_id - {}: unresolved data format", tag, wrapper_id);
+            exit(1);
+        }
+        if (ENABELD_LOG) {
+            spdlog::info("get range relations: {}", relation.debug());
+        }
+        relations.emplace_back(relation);
+    }
     return true;
 }
 
